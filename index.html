@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KA Designer - Canva Clone</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    nav {
+      width: 220px;
+      background: #2b2b2b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    nav h2 {
+      margin-bottom: 30px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    nav a:hover {
+      color: #ff9800;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #6200ea;
+      color: white;
+      padding: 10px 20px;
+      font-size: 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      background: #eeeeee;
+      padding: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar input,
+    .toolbar button,
+    .toolbar select {
+      padding: 8px;
+    }
+
+    #canvas-area {
+      flex: 1;
+      background: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-object {
+      position: absolute;
+      cursor: move;
+      padding: 4px;
+      border: 1px dashed #aaa;
+    }
+
+    #templates {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .template {
+      width: 80px;
+      height: 80px;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .template:hover {
+      border: 2px solid #6200ea;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h2>KA Designer</h2>
+    <a href="#">Home</a>
+    <a href="#">Templates</a>
+    <a href="#">Create</a>
+    <a href="#">Contact</a>
+    <a href="#">About Us</a>
+  </nav>
+  <main>
+    <header>Welcome to Canva Clone – KA Designer</header>
+
+    <div class="toolbar">
+      <input type="text" id="text-input" placeholder="Enter text" />
+      <button onclick="addText()">Add Text</button>
+
+      <input type="file" id="image-upload" accept="image/*" onchange="addImage(event)" />
+      <button onclick="changeBackground()">Change Background</button>
+
+      <button onclick="download()">Download Design</button>
+    </div>
+
+    <div id="templates">
+      <div class="template" onclick="loadTemplate('Happy Birthday!')">🎉</div>
+      <div class="template" onclick="loadTemplate('Sale 50% Off!')">🛍️</div>
+      <div class="template" onclick="loadTemplate('Your Quote Here')">💬</div>
+    </div>
+
+    <div id="canvas-area" onclick="playClickSound()"></div>
+  </main>
+
+  <audio id="click-sound" src="https://www.soundjay.com/buttons/button-3.mp3" preload="auto"></audio>
+
+  <script>
+    const canvas = document.getElementById('canvas-area');
+
+    function addText() {
+      const text = document.getElementById('text-input').value;
+      if (!text) return;
+      const el = document.createElement('div');
+      el.className = 'canvas-object';
+      el.contentEditable = true;
+      el.style.left = '50px';
+      el.style.top = '50px';
+      el.innerText = text;
+      enableDrag(el);
+      canvas.appendChild(el);
+      document.getElementById('text-input').value = '';
+    }
+
+    function addImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.maxWidth = '200px';
+        img.className = 'canvas-object';
+        img.style.left = '50px';
+        img.style.top = '50px';
+        enableDrag(img);
+        canvas.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function enableDrag(el) {
+      let offsetX, offsetY;
+      el.onmousedown = function(e) {
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        document.onmousemove = function(e2) {
+          el.style.left = e2.pageX - canvas.offsetLeft - offsetX + 'px';
+          el.style.top = e2.pageY - canvas.offsetTop - offsetY + 'px';
+        };
+        document.onmouseup = function() {
+          document.onmousemove = null;
+        };
+      };
+    }
+
+    function changeBackground() {
+      const color = prompt("Enter background color (e.g., lightblue or #f4f4f4):", "#f0f0f0");
+      if (color) {
+        canvas.style.background = color;
+      }
+    }
+
+    function download() {
+      html2canvas(canvas).then(canvasEl => {
+        const link = document.createElement('a');
+        link.download = 'my-design.png';
+        link.href = canvasEl.toDataURL();
+        link.click();
+      });
+    }
+
+    function loadTemplate(text) {
+      document.getElementById('text-input').value = text;
+      addText();
+    }
+
+    function playClickSound() {
+      const sound = document.getElementById('click-sound');
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    // Load html2canvas library
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
